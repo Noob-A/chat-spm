@@ -2,18 +2,10 @@ const spapi = require('spapi.js').SPm; //SPm - сервер #СПм.
 const Discord = require('discord.js');
 const robot = require('robotjs');
 const cleverbot = require("cleverbot-free");
-const clipboardy = require('clipboardy');
 const client = new Discord.Client();
 let channelList = []
 let lastMessage = []
 let withAlice = []
-function isMat(text){
-    require("fs").readFile("C:\\Users\\Emil\\Desktop\\mat.txt", function(err, cont) {
-        if (err)
-            throw err;
-        return cont.indexOf(text)>-1;
-    });
-}
 
 function arrayRemove(arr, value) {
     const index = arr.indexOf(value);
@@ -24,13 +16,7 @@ function arrayRemove(arr, value) {
 function isInArray(value, array) {
     return array.indexOf(value) > -1;
 }
-function write_chat(text)
-{
-    robot.keyTap('t');
-    clipboardy.writeSync(text)
-    robot.keyTap('v','control');
-    robot.keyTap('enter');
-}
+
 client.on('ready', () => {
     client.user.setActivity(".help | Список команд");
     setInterval(() => {
@@ -58,11 +44,7 @@ client.on('ready', () => {
                         cleverbot(messages[messages.length-1].text).then(response => channel.send('[**Bot**] ' + "НедоАлиса" + ':' + ' ' + response));
                     }catch (e) {}
                 }
-
-
                 //cleverbot(messages[messages.length-1].text).then(response => write_chat('!'+'[Bot] ' + "НедоАлиса" + ':' + ' ' + response));
-
-
             }
 
         }).catch(err => console.error(err));}, 3000);
@@ -70,12 +52,18 @@ client.on('ready', () => {
 });
 client.on('message', message => {
     if (message.content === '.setup'){
-        channelList.push(message.channel.id)
-        message.channel.send('Бот успешно настроен! Чтобы отключить меня от этого канала напиши .leave в этот же канал.')
+        if (!channelList.includes(message.channel.id)) {
+            channelList.push(message.channel.id)
+            message.channel.send('Бот успешно настроен! Чтобы отключить меня от этого канала напиши .leave в этот же канал.')
+        }
+        message.channel.send("Вы не можете использовать команду .setup в одном и том же канале!")
     }
     if (message.content === '.leave') {
-        arrayRemove(channelList, message.channel.id)
-        message.channel.send('Бот успешно отключён от канала! Чтобы вернуть меня напиши .setup любой другой канал.')
+        if (channelList.includes(message.channel.id)) {
+            arrayRemove(channelList, message.channel.id)
+            message.channel.send('Бот успешно отключён от канала! Чтобы вернуть меня напиши .setup любой другой канал.')
+        }
+        message.channel.send("Вы не можете использовать эту команду пока не пропишите .setup !")
     }
     if (message.content === '.help') {
         message.channel.send('Подключить чат в канал где исполнена команда:\n' +
